@@ -5,6 +5,7 @@ public class ReversiPiece {
     private int color;
     public ReversiPiece(int i){
         color = i;
+
     }
     public void flipPiece(){
         if(color != 0) {
