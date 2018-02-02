@@ -4,8 +4,12 @@ package reversi;
  */
 public class ReversiPiece {
     private int color;
-    public ReversiPiece(int i){
+    private int x;
+    private int y;
+    public ReversiPiece(int i, int x, int y){
         color = i;
+        this.x = x;
+        this.y = y;
 
     }
     public void flipPiece(){
@@ -20,6 +24,14 @@ public class ReversiPiece {
     public void setColor(int x){
         color = x;
     }
+    public int getX(){
+        return x;
+    }
+
+    public int getY() {
+        return y;
+    }
+
     public int getColor(){
         return color;
     }

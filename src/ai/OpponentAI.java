@@ -1,4 +1,5 @@
 package ai;
+import reversi.*;
 import java.util.Set;
 
 import reversi.ReversiGame;

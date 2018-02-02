@@ -95,34 +95,34 @@ public class GUI extends JFrame{
         for (int ii = 0; ii < 8; ii++) {
             for (int jj = 0; jj < 8; jj++) {
 
-                        int x = ii;
-                        int y = jj;
-                        boardspaces[ii][jj].setBackground(Color.GREEN);
-                        reversiBoard.add(boardspaces[ii][jj]);
-                        boardspaces[ii][jj].addActionListener(new ActionListener() {
-                            @Override
-                            public void actionPerformed(ActionEvent e) {
-                               // reversiGame.getBoard().getPiece(ii, jj).flipPiece();
-                                BufferedImage image = new BufferedImage(64, 64, BufferedImage.TYPE_4BYTE_ABGR);
-                                paintComponent(image);
-                                try {
-                                    if(col) {
-                                        image = ImageIO.read(new File("res/reversiblack.png"));
-                                    }else {
-                                        image = ImageIO.read(new File("res/reversiwhite.png"));
-                                    }
-                                } catch (IOException ex) {
-                                    // handle exception...
-                                }
-
-                                ImageIcon icon = new ImageIcon();
-                                icon.setImage(image);
-                                boardspaces[x][y].setOpaque(false);
-                                boardspaces[x][y].setContentAreaFilled(false);
-                                boardspaces[x][y].setBorderPainted(false);
-                                boardspaces[x][y].setIcon(icon);
+                int x = ii;
+                int y = jj;
+                boardspaces[ii][jj].setBackground(Color.GREEN);
+                reversiBoard.add(boardspaces[ii][jj]);
+                boardspaces[ii][jj].addActionListener(new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        // reversiGame.getBoard().getPiece(ii, jj).flipPiece();
+                        BufferedImage image = new BufferedImage(64, 64, BufferedImage.TYPE_4BYTE_ABGR);
+                        paintComponent(image);
+                        try {
+                            if(col) {
+                                image = ImageIO.read(new File("res/reversiblack.png"));
+                            }else {
+                                image = ImageIO.read(new File("res/reversiwhite.png"));
                             }
-                        });
+                        } catch (IOException ex) {
+                            // handle exception...
+                        }
+
+                        ImageIcon icon = new ImageIcon();
+                        icon.setImage(image);
+                        boardspaces[x][y].setOpaque(false);
+                        boardspaces[x][y].setContentAreaFilled(false);
+                        boardspaces[x][y].setBorderPainted(false);
+                        boardspaces[x][y].setIcon(icon);
+                    }
+                });
             }
         }
 
