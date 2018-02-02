@@ -1,3 +1,4 @@
+package reversi;
 /**
  * Created by carltidelius on 2018-01-24.
  */

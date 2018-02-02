@@ -1,3 +1,4 @@
+package reversi;
 import java.util.Set;
 
 /**
