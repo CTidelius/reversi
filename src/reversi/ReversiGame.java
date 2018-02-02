@@ -274,6 +274,6 @@ public class ReversiGame {
     public static void main(String[] args){
         ReversiGame rg = new ReversiGame();
         System.out.println(rg);
-        System.out.println(rg.isLegalAction(BLACK, 2, 4));
+        System.out.println(rg.isLegalAction(BLACK, 2, 5));
     }
 }

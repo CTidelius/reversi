@@ -1,3 +1,4 @@
+
 package ai;
 import reversi.*;
 import java.util.Set;
