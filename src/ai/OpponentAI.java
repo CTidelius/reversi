@@ -1,6 +1,9 @@
 package ai;
 import java.util.Set;
 
+import reversi.ReversiGame;
+import reversi.ReversiTile;
+
 /**
  * Created by carltidelius on 2018-01-29.
  */
@@ -18,12 +21,12 @@ public class OpponentAI {
 	}
 
 	public void makeMove(int max_ply_depth) {
-		Set<ReversiPiece> legal_actions = GAME_BOARD.getLegalActions(AI_COLOR);
+		Set<ReversiTile> legal_actions = GAME_BOARD.getLegalActions(AI_COLOR);
 
 		int max_value = -Integer.MAX_VALUE;
-		ReversiPiece best_move = null;
+		ReversiTile best_move = null;
 
-		for (ReversiPiece piece : legal_actions) {
+		for (ReversiTile piece : legal_actions) {
 
 			ReversiGame game_copy = GAME_BOARD.copy();
 			game_copy.addPiece(piece);
@@ -56,18 +59,18 @@ public class OpponentAI {
 
 			int current_color = (is_maximizer_turn) ? AI_COLOR : OPPONENT_COLOR;
 
-			Set<ReversiPiece> legal_actions = simulated_game.getLegalActions(current_color);
+			Set<ReversiTile> legal_actions = simulated_game.getLegalActions(current_color);
 
 			int min_value = Integer.MAX_VALUE;
 			int max_value = -Integer.MAX_VALUE;
 
 			// For each legal action in current state...
-			for (ReversiPiece piece : legal_actions) {
+			for (ReversiTile piece : legal_actions) {
 
 				// Create a copy of the current game and add piece.
 				ReversiGame game_copy = simulated_game.copy();
 				game_copy.addPiece(piece);
-				int branch_value = calculateBranchScore(game_copy, current_depth + 1);
+				int branch_value = calculateBranchScore(game_copy, current_depth + 1, max_ply_depth, !is_maximizer_turn);
 
 				// Update min/max values
 				if (branch_value >= max_value) {
@@ -79,10 +82,8 @@ public class OpponentAI {
 
 			// Determine what value to return based on who's turn it is.
 			if (is_maximizer_turn) {
-				is_maximizer_turn = !is_maximizer_turn;
 				return max_value;
 			} else {
-				is_maximizer_turn = !is_maximizer_turn;
 				return min_value;
 			}
 
