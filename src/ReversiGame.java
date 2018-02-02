@@ -2,7 +2,7 @@
  * Created by carltidelius on 2018-01-19.
  */
 
-public class ReversiGame implements GameEnvironment{
+public class ReversiGame{
     private GUI reversiGui;
     private ReversiPiece[][] gameBoard;
 
@@ -10,6 +10,10 @@ public class ReversiGame implements GameEnvironment{
         reversiGui = new GUI();
         gameBoard = new ReversiPiece[8][8];
         initializeBoard();
+    }
+    
+    public ReversiGame copy() {
+		return null;
     }
 
     /*
