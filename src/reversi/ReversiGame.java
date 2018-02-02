@@ -57,155 +57,44 @@ public class ReversiGame {
 		if (gameBoard[x][y].getColor() != BLANK) {
 			return false;
 		}
-		for (int i = 0; i < 8; i++) {
-			if (checkDirection(i, new ReversiPiece(color, x, y))) {
-				return true;
-			}
-		}
-		return false;
-	}
 
-	public boolean checkDirection(int direction, ReversiPiece rp) {
-		int x = 0;
-		int y = 0;
-		int color = 0;
-		if (rp.getColor() == BLACK) {
-			color = WHITE;
-		} else if (rp.getColor() == WHITE){
-			color = BLACK;
-		} else {
-			color = BLANK;
-		}
-		switch (direction) {
-		case UPLEFT:
-			x = rp.getX() - 1;
-			y = rp.getY() - 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-		case UP:
-			x = rp.getX();
-			y = rp.getY() - 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-		case UPRIGHT:
-			x = rp.getX() + 1;
-			y = rp.getY() - 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-		case LEFT:
-			x = rp.getX() - 1;
-			y = rp.getY();
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-		case RIGHT:
-			x = rp.getX() + 1;
-			y = rp.getY();
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-		case DOWNLEFT:
-			x = rp.getX() - 1;
-			y = rp.getY() + 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
+		// For every possible direction.. (dx = [-1..1] and dy = [-1..1])
+		for (int dx = -1; dx <= 1; dx++) {
+			for (int dy = -1; dy <= 1; dy++) {
 
-		case DOWN:
-			x = rp.getX();
-			y = rp.getY() + 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-
-		case DOWNRIGHT:
-			x = rp.getX() + 1;
-			y = rp.getY() + 1;
-			if (isOutOfBounds(x, y)) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == BLANK) {
-				return false;
-			}
-			if (gameBoard[x][y].getColor() == color) {
-				return checkDirection(direction, new ReversiPiece(rp.getColor(), x, y));
-			} else {
-				return true;
-			}
-
-		}
-		return false;
-	}
-
-	public Set<ReversiPiece> getPieces(int color) {
-		Set<ReversiPiece> pieces = new HashSet<>(64);
-		for (ReversiPiece[] rColumn : gameBoard) {
-			for (ReversiPiece rp : rColumn) {
-				if (rp.getColor() == color) {
-					pieces.add(rp);
+				if (!(dx == 0 && dy == 0)) {
+					if (checkDirection(color, x + dx, y + dy, dx, dy, 1)) {
+						return true;
+					}
 				}
 			}
 		}
-		return pieces;
+
+		return false;
+	}
+
+	private int getInvertedColor(int color) {
+		return (color == BLACK) ? WHITE : BLACK;
+	}
+
+	private boolean checkDirection(int color, int x, int y, int dx, int dy, int distance) {
+
+		if (isOutOfBounds(x, y) || gameBoard[x][y].getColor() == BLANK) {
+			return false;
+		}
+
+		if (gameBoard[x][y].getColor() == color && distance > 1) {
+			// If the distance is over 1 and the same color is found again we
+			// have surrounded the opponent.
+			return true;
+		} else if (gameBoard[x][y].getColor() == getInvertedColor(color)) {
+			// If we find the opponent's color we continue traversing the board.
+			return checkDirection(color, x + dx, y + dy, dx, dy, distance + 1);
+		} else {
+			// If we find our own color and the distance is <1.
+			return false;
+		}
+
 	}
 
 	/*
@@ -249,7 +138,7 @@ public class ReversiGame {
 	@Override
 	public String toString() {
 
-		final int COLOR = WHITE;
+		final int COLOR = BLACK;
 
 		StringBuilder builder = new StringBuilder();
 		builder.append("    !! Super Reversi !! \n");
@@ -303,6 +192,8 @@ public class ReversiGame {
 	}
 
 	public static void main(String[] args) {
+		ReversiGame rg = new ReversiGame();
+		rg.addPiece(WHITE, 2, 3);
 
 		Scanner input = new Scanner(System.in);
 
@@ -326,7 +217,6 @@ public class ReversiGame {
 			}
 		}
 
-		ReversiGame rg = new ReversiGame();
 		System.out.println(rg);
 	}
 }
