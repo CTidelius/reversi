@@ -4,11 +4,12 @@ import reversi.*;
 import java.util.Set;
 
 import reversi.ReversiGame;
-import reversi.ReversiTile;
+//import reversi.ReversiTile;
 
 /**
  * Created by carltidelius on 2018-01-29.
  */
+/*
 public class OpponentAI {
 
 	private final int AI_COLOR;
@@ -94,3 +95,4 @@ public class OpponentAI {
 	}
 
 }
+*/

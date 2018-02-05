@@ -49,10 +49,9 @@ public class ReversiGame {
 	/*
 	 * Check if the action the player made on GUI is legal?
 	 */
-	public boolean isLegalAction(int color, int x, int y) {
+	public boolean isLegalAction(int color, int x, int y, boolean isPlayerMove) {
 		if (isOutOfBounds(x, y)) {
-			System.err.println("Outside bounds");
-			System.exit(-1);
+			return false;
 		}
 		if (gameBoard[x][y].getColor() != BLANK) {
 			return false;
@@ -63,7 +62,8 @@ public class ReversiGame {
 			for (int dy = -1; dy <= 1; dy++) {
 
 				if (!(dx == 0 && dy == 0)) {
-					if (checkDirection(color, x + dx, y + dy, dx, dy, 1)) {
+					if (checkDirection(color, x + dx, y + dy, dx, dy, 1, isPlayerMove)) {
+
 						return true;
 					}
 				}
@@ -77,7 +77,7 @@ public class ReversiGame {
 		return (color == BLACK) ? WHITE : BLACK;
 	}
 
-	private boolean checkDirection(int color, int x, int y, int dx, int dy, int distance) {
+	private boolean checkDirection(int color, int x, int y, int dx, int dy, int distance, boolean isPlayerMove) {
 
 		if (isOutOfBounds(x, y) || gameBoard[x][y].getColor() == BLANK) {
 			return false;
@@ -89,8 +89,15 @@ public class ReversiGame {
 			return true;
 		} else if (gameBoard[x][y].getColor() == getInvertedColor(color)) {
 			// If we find the opponent's color we continue traversing the board.
-			return checkDirection(color, x + dx, y + dy, dx, dy, distance + 1);
-		} else {
+			boolean legalDirection = checkDirection(color, x + dx, y + dy, dx, dy,
+					distance + 1, isPlayerMove);
+
+			if(legalDirection && isPlayerMove){
+				gameBoard[x][y].flipPiece();
+			}
+			return legalDirection;
+
+			} else {
 			// If we find our own color and the distance is <1.
 			return false;
 		}
@@ -120,7 +127,7 @@ public class ReversiGame {
 
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
-				if (isLegalAction(color, x, y)) {
+				if (isLegalAction(color, x, y, false)) {
 					legal.add(new Point(x, y));
 				}
 			}
@@ -190,10 +197,31 @@ public class ReversiGame {
 
 		return builder.toString();
 	}
+	public void getPlayerMove(){
+		Scanner input = new Scanner(System.in);
+		System.out.println("Choose where to put your piece with x and y coordinates:" + '\n');
+		while(true) {
+			String s1 = input.next();
+			char[] s= s1.toCharArray();
+			int x = 0, y = 0;
+			try {
+				System.out.println("hej");
+				x = Character.getNumericValue(s[0]);
+				y = Character.getNumericValue(s[1]);
+			}catch (Exception e){
+
+			}
+			if (isLegalAction(BLACK, x, y, true)) {
+				addPiece(BLACK, x, y);
+				break;
+			} else {
+				System.out.println("This is not a legal action, chose one of the assigned legal moves.");
+			}
+		}
+	}
 
 	public static void main(String[] args) {
 		ReversiGame rg = new ReversiGame();
-		rg.addPiece(WHITE, 2, 3);
 
 		Scanner input = new Scanner(System.in);
 
@@ -216,7 +244,10 @@ public class ReversiGame {
 			} catch (Exception e) {
 			}
 		}
+		while(true){
+			System.out.println(rg);
+			rg.getPlayerMove();
 
-		System.out.println(rg);
+		}
 	}
 }
