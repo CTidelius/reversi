@@ -74,6 +74,7 @@ public class OpponentAI {
 			int min_value = Integer.MAX_VALUE;
 			int max_value = -Integer.MAX_VALUE;
 
+			
 			// For each legal action in current state...
 			for (Point tile : legal_actions) {
 
