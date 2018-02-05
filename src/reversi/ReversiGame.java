@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import ai.OpponentAI;
 import gui.GUI;
 
 /**
@@ -12,21 +13,27 @@ import gui.GUI;
  */
 
 public class ReversiGame {
-	private GUI reversiGui;
 	private ReversiPiece[][] gameBoard;
 
 	public final static int BLANK = 0, WHITE = 1, BLACK = 2;
 
-	public final static int UPLEFT = 0, UP = 1, UPRIGHT = 2, LEFT = 3, RIGHT = 4, DOWNLEFT = 5, DOWN = 6, DOWNRIGHT = 7;
-
 	public ReversiGame() {
-		reversiGui = new GUI();
 		gameBoard = new ReversiPiece[8][8];
 		initializeBoard();
+
 	}
 
 	public ReversiGame copy() {
-		return null;
+
+		ReversiGame new_game = new ReversiGame();
+
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				new_game.addPiece(gameBoard[i][j].getColor(), i, j);
+			}
+		}
+
+		return new_game;
 	}
 
 	/*
@@ -57,20 +64,26 @@ public class ReversiGame {
 			return false;
 		}
 
+		boolean isLegal = false;
 		// For every possible direction.. (dx = [-1..1] and dy = [-1..1])
 		for (int dx = -1; dx <= 1; dx++) {
 			for (int dy = -1; dy <= 1; dy++) {
 
 				if (!(dx == 0 && dy == 0)) {
+
 					if (checkDirection(color, x + dx, y + dy, dx, dy, 1, isPlayerMove)) {
 
-						return true;
+						isLegal = true;
+
+						if (!isPlayerMove) {
+							return true;
+						}
 					}
 				}
 			}
 		}
 
-		return false;
+		return isLegal;
 	}
 
 	private int getInvertedColor(int color) {
@@ -89,15 +102,14 @@ public class ReversiGame {
 			return true;
 		} else if (gameBoard[x][y].getColor() == getInvertedColor(color)) {
 			// If we find the opponent's color we continue traversing the board.
-			boolean legalDirection = checkDirection(color, x + dx, y + dy, dx, dy,
-					distance + 1, isPlayerMove);
+			boolean legalDirection = checkDirection(color, x + dx, y + dy, dx, dy, distance + 1, isPlayerMove);
 
-			if(legalDirection && isPlayerMove){
+			if (legalDirection && isPlayerMove) {
 				gameBoard[x][y].flipPiece();
 			}
 			return legalDirection;
 
-			} else {
+		} else {
 			// If we find our own color and the distance is <1.
 			return false;
 		}
@@ -114,8 +126,29 @@ public class ReversiGame {
 	/*
 	 * Check the board to update GUI?
 	 */
-	public double evalState(int color) {
-		return 0;
+	public int evalState(int color) {
+
+		int score = 0;
+
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+
+				if (gameBoard[x][y].getColor() == color && isCorner(x, y)) {
+					score += 10;
+				} else if (gameBoard[x][y].getColor() == getInvertedColor(color)) {
+					score--;
+				}
+			}
+		}
+		return score;
+	}
+
+	private boolean isCorner(int x, int y) {
+		if (x == 0 && (y == 0 || y == 7) || x == 7 && (y == 0 || y == 7)) {
+			return true;
+		}
+
+		return false;
 	}
 
 	/*
@@ -145,7 +178,7 @@ public class ReversiGame {
 	@Override
 	public String toString() {
 
-		final int COLOR = BLACK;
+		final int COLOR = BLACK;// TODO
 
 		StringBuilder builder = new StringBuilder();
 		builder.append("    !! Super Reversi !! \n");
@@ -160,7 +193,6 @@ public class ReversiGame {
 		builder.append("\n");
 
 		Set<Point> legal_moves = getLegalActions(COLOR);
-		System.out.println("Legal moved: " + legal_moves.size());
 
 		for (int y = 0; y < 8; y++) {
 
@@ -197,18 +229,18 @@ public class ReversiGame {
 
 		return builder.toString();
 	}
-	public void getPlayerMove(){
+
+	public void getPlayerMove() {
 		Scanner input = new Scanner(System.in);
 		System.out.println("Choose where to put your piece with x and y coordinates:" + '\n');
-		while(true) {
+		while (true) {
 			String s1 = input.next();
-			char[] s= s1.toCharArray();
+			char[] s = s1.toCharArray();
 			int x = 0, y = 0;
 			try {
-				System.out.println("hej");
 				x = Character.getNumericValue(s[0]);
 				y = Character.getNumericValue(s[1]);
-			}catch (Exception e){
+			} catch (Exception e) {
 
 			}
 			if (isLegalAction(BLACK, x, y, true)) {
@@ -222,6 +254,8 @@ public class ReversiGame {
 
 	public static void main(String[] args) {
 		ReversiGame rg = new ReversiGame();
+		OpponentAI ai = new OpponentAI(WHITE, rg);
+		OpponentAI ai2 = new OpponentAI(BLACK, rg);
 
 		Scanner input = new Scanner(System.in);
 
@@ -244,10 +278,22 @@ public class ReversiGame {
 			} catch (Exception e) {
 			}
 		}
-		while(true){
+
+		boolean my_turn = true;
+		while (true) {
+			System.out.println("\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n");
 			System.out.println(rg);
-			rg.getPlayerMove();
+
+			if (my_turn) {
+				// rg.getPlayerMove();
+				ai2.makeMove(5);
+			} else {
+				ai.makeMove(5);
+			}
+
+			my_turn = !my_turn;
 
 		}
+
 	}
 }
