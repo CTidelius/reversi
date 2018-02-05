@@ -86,7 +86,7 @@ public class ReversiGame {
 		return isLegal;
 	}
 
-	private int getInvertedColor(int color) {
+	public static int getInvertedColor(int color) {
 		return (color == BLACK) ? WHITE : BLACK;
 	}
 
