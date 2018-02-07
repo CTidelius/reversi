@@ -19,7 +19,7 @@ public class GreedyAiPlayer extends ReversiPlayer {
 			ReversiGame simulated_game = game.copy();
 			simulated_game.addPiece(color, action.x, action.y);
 
-			int score = simulated_game.evalState(color, game.HOMOGEN_HEURISTICS);
+			int score = simulated_game.evalState(color, game.HOMOGENEOUS_HEURISTICS);
 
 			if (score >= max_score) {
 				max_score = score;

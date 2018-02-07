@@ -6,7 +6,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 /**
- * Created by carltidelius on 2018-01-19.
+ * Created by carltidelius and Tom on 2018-01-19.
  */
 
 public class ReversiGame {
@@ -15,7 +15,11 @@ public class ReversiGame {
 
 	public final static int BLANK = 0, WHITE = 1, BLACK = 2;
 
-	public BoardHeuristics HOMOGEN_HEURISTICS = new BoardHeuristics() {
+	/**
+	 * Homogeneous heuristics. Counts occupied tiles that belongs to certain
+	 * color.
+	 */
+	public final BoardEvaluator HOMOGENEOUS_HEURISTICS = new BoardEvaluator() {
 		@Override
 		public int evaluateGameState(int color) {
 
@@ -38,12 +42,20 @@ public class ReversiGame {
 	/**
 	 * Heuristics function used by Edax.
 	 */
-	public BoardHeuristics EDAX_HEURISTICS = new BoardHeuristics() {
+	public final BoardEvaluator EDAX_HEURISTICS = new BoardEvaluator() {
 
 		@Override
 		public int evaluateGameState(int color) {
 			int score = 0;
 			int c;
+
+			if (isTerminalState()) {
+				if (evalState(color, HOMOGENEOUS_HEURISTICS) < 0) {
+					// If true, this means the opponent wins!!
+					return Integer.MIN_VALUE;
+				}
+			}
+
 			for (int x = 0; x < 8; x++) {
 				for (int y = 0; y < 8; y++) {
 					c = gameBoard[x][y].getColor();
@@ -73,12 +85,36 @@ public class ReversiGame {
 		}
 	};
 
+
+
 	public ReversiGame() {
 		gameBoard = new ReversiPiece[8][8];
 		initializeBoard();
 
 	}
+	
+	/**
+	 * 
+	 * @return Returns true if every game tile is occupied.
+	 */
+	private boolean isTerminalState() {
 
+		for (int x = 0; x < 8; x++) {
+			for (int y = 0; y < 8; y++) {
+
+				if (gameBoard[x][y].getColor() == BLANK) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * 
+	 * @return Returns copy of this Reversi board.
+	 */
 	public ReversiGame copy() {
 
 		ReversiGame new_game = new ReversiGame();
@@ -95,7 +131,7 @@ public class ReversiGame {
 	/*
 	 * Set up the game board with middle pieces as per Reversi rules
 	 */
-	public void initializeBoard() {
+	private void initializeBoard() {
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				if ((i == 3 && j == 3) || (i == 4 && j == 4)) {
@@ -109,9 +145,8 @@ public class ReversiGame {
 		}
 	}
 
-	/*
-	 * Check if the action the player made on GUI is legal?
-	 */
+	
+	// TODO: CHANGE NAME!!!
 	public boolean isLegalAction(int color, int x, int y, boolean isPlayerMove) {
 		if (isOutOfBounds(x, y)) {
 			return false;
@@ -179,7 +214,7 @@ public class ReversiGame {
 		gameBoard[x][y].setColor(color);
 	}
 
-	public int evalState(int color, BoardHeuristics heuristics) {
+	public int evalState(int color, BoardEvaluator heuristics) {
 		return heuristics.evaluateGameState(color);
 
 	}
@@ -406,7 +441,7 @@ public class ReversiGame {
 
 	}
 
-	interface BoardHeuristics {
+	interface BoardEvaluator {
 
 		/**
 		 * 
