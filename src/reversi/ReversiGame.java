@@ -325,18 +325,7 @@ public class ReversiGame {
 			}
 		}
 
-		/*
-		 * String player; while (true) { System.out.print(
-		 * "Who do you want to play against? Other (P)layer, (A)I: ");
-		 * 
-		 * player = input.nextLine().toLowerCase();
-		 * 
-		 * if (player.equals("p")) { break; } else if (player.equals("a")) {
-		 * ReversiPlayer ai = new AiPlayer(1000);
-		 * 
-		 * break; } }
-		 */
-
+	
 		ReversiPlayer ai_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.EDAX_HEURISTICS);
 		ReversiPlayer human_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.HOMOGENEOUS_HEURISTICS);
 
@@ -352,7 +341,6 @@ public class ReversiGame {
 				ai_player.makeMove(rg, ai_color);
 				long time_taken = System.currentTimeMillis() - time;
 
-				System.err.println(time_taken);
 			}
 
 			my_turn = !my_turn;
@@ -362,8 +350,11 @@ public class ReversiGame {
 			}
 
 		}
-
+		
 		System.out.println(rg.getASCII(human_color));
+
+		System.out.println("*********");
+		System.out.println("GAME OVER");
 		System.out.println(human_player.toString() + ": " + rg.colorScore(human_color));
 		System.out.println(ai_player.toString() + ": " + rg.colorScore(ai_color));
 
@@ -412,19 +403,25 @@ public class ReversiGame {
 				builder.append(p);
 				builder.append("]");
 
-				if (x == 7 && y == 3) {
+				if (x == 7 && y == 1) {
 					builder.append("  State evaluation (#)(Edax): " + evalState(BLACK, EDAX_HEURISTICS));
-				} else if (x == 7 && y == 4) {
+				} else if (x == 7 && y == 2) {
 					builder.append("  State evaluation (O)(Edax): " + evalState(WHITE, EDAX_HEURISTICS));
+				} else if (x == 7 && y == 4) {
+					builder.append("\tO = WHITE");
+				} else if (x == 7 && y == 5) {
+					builder.append("\t# = BLACK");
+				} else if (x == 7 && y == 6) {
+					builder.append("\t+ = LEGAL MOVES");
+				} else if (x == 7 && y == 7) {
+					builder.append("\tScore  #=" + colorScore(BLACK) + " : O=" + colorScore(WHITE));
 				}
-
 			}
 
 			builder.append("\n");
 		}
 
 		builder.append("y\n|\nv");
-		builder.append("\n\tO = WHITE\n\t# = BLACK\n\t+ = LEGAL MOVES");
 
 		return builder.toString();
 	}

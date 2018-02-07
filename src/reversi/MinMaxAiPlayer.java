@@ -21,13 +21,12 @@ public class MinMaxAiPlayer extends ReversiPlayer {
 		long start_time = System.nanoTime();
 
 		Set<Point> legal_actions = board.getLegalActions(ai_color);
-		System.err.println("LEGAL ACTIONS: (" + ai_color + " ) : " + legal_actions.size());
 
 		if (legal_actions.size() == 0) {
 			return;
 		}
 
-		int max_value = -Integer.MAX_VALUE;
+		int max_value = Integer.MIN_VALUE;
 		Point best_tile = null;
 		long time_limit = GLOBAL_TIME_LIMIT / legal_actions.size();
 		long done_by = start_time + time_limit;
