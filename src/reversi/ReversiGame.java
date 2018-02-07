@@ -5,13 +5,14 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
+import reversi.ReversiGame.BoardEvaluator;
+
 /**
  * Created by carltidelius and Tom on 2018-01-19.
  */
 
 public class ReversiGame {
 	private ReversiPiece[][] gameBoard;
-	private int YOURCOLOR = BLACK;
 
 	public final static int BLANK = 0, WHITE = 1, BLACK = 2;
 
@@ -21,15 +22,15 @@ public class ReversiGame {
 	 */
 	public final BoardEvaluator HOMOGENEOUS_HEURISTICS = new BoardEvaluator() {
 		@Override
-		public int evaluateGameState(int color) {
+		public int evaluateGameState(ReversiGame game, int color) {
 
 			int score = 0;
 
 			for (int x = 0; x < 7; x++) {
 				for (int y = 0; y < 7; y++) {
-					if (gameBoard[x][y].getColor() == color) {
+					if (game.gameBoard[x][y].getColor() == color) {
 						score++;
-					} else if (gameBoard[x][y].getColor() == ReversiGame.getInvertedColor(color)) {
+					} else if (game.gameBoard[x][y].getColor() == ReversiGame.getInvertedColor(color)) {
 						score--;
 					}
 				}
@@ -45,7 +46,7 @@ public class ReversiGame {
 	public final BoardEvaluator EDAX_HEURISTICS = new BoardEvaluator() {
 
 		@Override
-		public int evaluateGameState(int color) {
+		public int evaluateGameState(ReversiGame game, int color) {
 			int score = 0;
 			int c;
 
@@ -58,27 +59,27 @@ public class ReversiGame {
 
 			for (int x = 0; x < 8; x++) {
 				for (int y = 0; y < 8; y++) {
-					c = gameBoard[x][y].getColor();
+					c = game.gameBoard[x][y].getColor();
 					if (c == color && isCorner(x, y)) {
-						score += 10;
+						score += 3;
 					} else if (c == color && isBuffer(x, y)) {
-						score -= 10;
+						score -= 1;
 					} else if (c == color && isEdge(x, y)) {
 						score += 2;
 					} else if (c == BLANK) {
-
-					} else if (c == getInvertedColor(color) && isCorner(x, y)) {
-						score -= 10;
-					} else if (c == getInvertedColor(color) && isBuffer(x, y)) {
-						score += 10;
-					} else if (c == getInvertedColor(color) && isEdge(x, y)) {
-						score -= 2;
-					} else if (c == getInvertedColor(color)) {
-						score--;
-					} else {
+					} else if (c == color) {
 						score++;
 					}
 
+					/*
+					 * else if (c == getInvertedColor(color) && isCorner(x, y))
+					 * { score -= 10; } else if (c == getInvertedColor(color) &&
+					 * isBuffer(x, y)) { score += 10; } else if (c ==
+					 * getInvertedColor(color) && isEdge(x, y)) { score -= 2; }
+					 * else if (c == getInvertedColor(color)) { score--; } else
+					 * { score++; }
+					 * 
+					 */
 				}
 			}
 			return score;
@@ -107,6 +108,13 @@ public class ReversiGame {
 		}
 
 		return true;
+	}
+
+	public boolean noMovesPossible() {
+		if (getLegalActions(BLACK).size() == 0 && getLegalActions(WHITE).size() == 0) {
+			return true;
+		}
+		return false;
 	}
 
 	/**
@@ -143,8 +151,17 @@ public class ReversiGame {
 		}
 	}
 
-	// TODO: CHANGE NAME!!!
-	public boolean isLegalAction(int color, int x, int y, boolean isPlayerMove) {
+	public boolean isLegalAction(int color, int x, int y) {
+		return traverse(color, x, y, false);
+	}
+
+	public boolean addNFlip(int color, int x, int y) {
+		boolean can_flip = traverse(color, x, y, true);
+		gameBoard[x][y].setColor(color);
+		return can_flip;
+	}
+
+	private boolean traverse(int color, int x, int y, boolean isPlayerMove) {
 		if (isOutOfBounds(x, y)) {
 			return false;
 		}
@@ -207,12 +224,12 @@ public class ReversiGame {
 	/*
 	 * Apply the action that player made on GUI with XY coordinates?
 	 */
-	public void addPiece(int color, int x, int y) {
+	private void addPiece(int color, int x, int y) {
 		gameBoard[x][y].setColor(color);
 	}
 
 	public int evalState(int color, BoardEvaluator heuristics) {
-		return heuristics.evaluateGameState(color);
+		return heuristics.evaluateGameState(this, color);
 
 	}
 
@@ -249,7 +266,7 @@ public class ReversiGame {
 
 		for (int x = 0; x < 8; x++) {
 			for (int y = 0; y < 8; y++) {
-				if (isLegalAction(color, x, y, false)) {
+				if (isLegalAction(color, x, y)) {
 					legal.add(new Point(x, y));
 				}
 			}
@@ -264,10 +281,97 @@ public class ReversiGame {
 			return false;
 	}
 
-	@Override
-	public String toString() {
+	public int colorScore(int color) {
+		int score = 0;
+		for (int i = 0; i < 8; i++) {
+			for (int j = 0; j < 8; j++) {
+				if (gameBoard[i][j].getColor() == color) {
+					score++;
+				}
+			}
+		}
+		return score;
+	}
 
-		final int COLOR = YOURCOLOR;// TODO
+	public static void main(String[] args) {
+		ReversiGame rg = new ReversiGame();
+		Scanner input = new Scanner(System.in);
+
+		int human_color = -1;
+
+		while (true) {
+			System.out.print("Choose Color (b/w): ");
+
+			String color = input.nextLine();
+
+			if (color.equals("b")) {
+				human_color = BLACK;
+				break;
+			} else if (color.equals("w")) {
+				human_color = WHITE;
+				break;
+			}
+		}
+
+		int ai_color = ReversiGame.getInvertedColor(human_color);
+		long ai_time = 1;
+		while (true) {
+			System.out.print("Choose AI max calculation time (ms): ");
+
+			try {
+				ai_time = Integer.parseInt(input.nextLine());
+				break;
+			} catch (Exception e) {
+			}
+		}
+
+		/*
+		 * String player; while (true) { System.out.print(
+		 * "Who do you want to play against? Other (P)layer, (A)I: ");
+		 * 
+		 * player = input.nextLine().toLowerCase();
+		 * 
+		 * if (player.equals("p")) { break; } else if (player.equals("a")) {
+		 * ReversiPlayer ai = new AiPlayer(1000);
+		 * 
+		 * break; } }
+		 */
+
+		ReversiPlayer ai_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.EDAX_HEURISTICS);
+		ReversiPlayer human_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.HOMOGENEOUS_HEURISTICS);
+
+		boolean my_turn = true;
+		while (true) {
+
+			if (my_turn) {
+				System.out.println(rg.getASCII(human_color));
+				human_player.makeMove(rg, human_color);
+			} else {
+
+				long time = System.currentTimeMillis();
+				ai_player.makeMove(rg, ai_color);
+				long time_taken = System.currentTimeMillis() - time;
+
+				System.err.println(time_taken);
+			}
+
+			my_turn = !my_turn;
+
+			if (rg.isTerminalState() || rg.noMovesPossible()) {
+				break;
+			}
+
+		}
+
+		System.out.println(rg.getASCII(human_color));
+		System.out.println(human_player.toString() + ": " + rg.colorScore(human_color));
+		System.out.println(ai_player.toString() + ": " + rg.colorScore(ai_color));
+
+	}
+
+	public String getASCII(int perspective) {
+
+		final int COLOR = perspective;
 
 		StringBuilder builder = new StringBuilder();
 		builder.append("    !! Super Reversi !! \n");
@@ -308,6 +412,12 @@ public class ReversiGame {
 				builder.append(p);
 				builder.append("]");
 
+				if (x == 7 && y == 3) {
+					builder.append("  State evaluation (#)(Edax): " + evalState(BLACK, EDAX_HEURISTICS));
+				} else if (x == 7 && y == 4) {
+					builder.append("  State evaluation (O)(Edax): " + evalState(WHITE, EDAX_HEURISTICS));
+				}
+
 			}
 
 			builder.append("\n");
@@ -319,126 +429,7 @@ public class ReversiGame {
 		return builder.toString();
 	}
 
-	public void getPlayerMove() {
-		Scanner input = new Scanner(System.in);
-		System.out.println("Choose where to put your piece with x and y coordinates:" + '\n');
-		while (true) {
-			String s1 = input.next();
-			char[] s = s1.toCharArray();
-			int x = 0, y = 0;
-			try {
-				x = Character.getNumericValue(s[0]);
-				y = Character.getNumericValue(s[1]);
-			} catch (Exception e) {
-
-			}
-			if (isLegalAction(YOURCOLOR, x, y, true)) {
-				addPiece(YOURCOLOR, x, y);
-				break;
-			} else {
-				System.out.println("This is not a legal action, chose one of the assigned legal moves.");
-			}
-		}
-	}
-
-	public int colorScore(int color) {
-		int score = 0;
-		for (int i = 0; i < 8; i++) {
-			for (int j = 0; j < 8; j++) {
-				if (gameBoard[i][j].getColor() == color) {
-					score++;
-				}
-			}
-		}
-		return score;
-	}
-
-	public static void main(String[] args) {
-		ReversiGame rg = new ReversiGame();
-
-		/*
-		 * 
-		 * Scanner input = new Scanner(System.in);
-		 * 
-		 * while (true) { System.out.print("Choose Color (b/w): ");
-		 * 
-		 * String color = input.nextLine();
-		 * 
-		 * if (color.equals("b")){ rg.YOURCOLOR = BLACK; break; } else
-		 * if(color.equals("w")) { rg.YOURCOLOR = WHITE; break; } }
-		 * 
-		 * 
-		 * 
-		 * 
-		 * int time = 1; while (true) { System.out.print(
-		 * "Choose AI max calculation time (ms): ");
-		 * 
-		 * try { time = Integer.parseInt(input.nextLine()); break; } catch
-		 * (Exception e) { } } String player; while (true) { System.out.print(
-		 * "Who do you want to play against? Other (P)layer, (A)I: ");
-		 * 
-		 * player = input.nextLine().toLowerCase();
-		 * 
-		 * if (player.equals("p")) { break; }else if (player.equals("a")){
-		 * ReversiPlayer ai = new AiPlayer(1000);
-		 * 
-		 * break; } }
-		 * 
-		 */
-
-		ReversiPlayer ai = new AiPlayer(1000);
-
-		// ReversiPlayer ai = new
-
-		ReversiPlayer player = new HumanPlayer();
-
-		boolean my_turn = true;
-		while (true) {
-
-			if (my_turn) {
-				System.out.println(rg);
-				player.makeMove(rg, ReversiGame.BLACK);
-			} else {
-				long time = System.currentTimeMillis();
-				ai.makeMove(rg, ReversiGame.WHITE);
-				long time_taken = System.currentTimeMillis() - time;
-				System.err.println(time_taken);
-			}
-
-			my_turn = !my_turn;
-
-		}
-
-		/*
-		 * boolean my_turn = true; while (true) {
-		 * if(rg.getLegalActions(BLACK).size() == 0 &&
-		 * rg.getLegalActions(WHITE).size() == 0){ int whiteScore =
-		 * rg.colorScore(WHITE); int blackScore = rg.colorScore(BLACK);
-		 * System.out.println("White player score: " + whiteScore);
-		 * System.out.println("Black player score: " + blackScore);
-		 * if(whiteScore<blackScore){ System.out.println("Black wins!"); }else
-		 * if (whiteScore > blackScore){ System.out.println("White wins!");
-		 * }else{ System.out.println("It's a tie!"); } break; }
-		 * System.out.println(rg); if(player.equals("p")) { if (my_turn) { if
-		 * (rg.getLegalActions(rg.YOURCOLOR).size() != 0){ rg.getPlayerMove(); }
-		 * } else { rg.getPlayerMove(); } }else{ if (my_turn) { if
-		 * (rg.getLegalActions(rg.YOURCOLOR).size() != 0){ rg.getPlayerMove(); }
-		 * } else { if
-		 * (rg.getLegalActions(rg.getInvertedColor(rg.YOURCOLOR)).size() != 0){
-		 * ai.makeMove(5);
-		 * 
-		 * } } }
-		 * 
-		 * my_turn = !my_turn;
-		 * 
-		 * 
-		 * 
-		 * }
-		 */
-
-	}
-
-	interface BoardEvaluator {
+	public interface BoardEvaluator {
 
 		/**
 		 * 
@@ -446,7 +437,7 @@ public class ReversiGame {
 		 *            Color to evaluate for
 		 * @return Returns state score for inserted color
 		 */
-		public int evaluateGameState(int color);
+		public int evaluateGameState(ReversiGame game, int color);
 
 	}
 

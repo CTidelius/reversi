@@ -17,7 +17,7 @@ public class GreedyAiPlayer extends ReversiPlayer {
 
 			// For each legal action evaluate
 			ReversiGame simulated_game = game.copy();
-			simulated_game.addPiece(color, action.x, action.y);
+			simulated_game.addNFlip(color, action.x, action.y);
 
 			int score = simulated_game.evalState(color, game.HOMOGENEOUS_HEURISTICS);
 
@@ -27,15 +27,17 @@ public class GreedyAiPlayer extends ReversiPlayer {
 			}
 		}
 
-		System.err.println(best_action);
-
 		if (best_action == null) {
 			// Do nothing
 		} else {
-			game.isLegalAction(color, best_action.x, best_action.y, true);
-			game.addPiece(color, best_action.x, best_action.y);
+			game.addNFlip(color, best_action.x, best_action.y);
 
 		}
+	}
+	
+	@Override
+	public String toString() {
+		return "Greedy Ai";
 	}
 
 }

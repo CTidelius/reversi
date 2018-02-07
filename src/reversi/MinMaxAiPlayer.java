@@ -6,12 +6,14 @@ import java.util.Set;
 
 import javax.sound.midi.Synthesizer;
 
-public class AiPlayer extends ReversiPlayer {
+public class MinMaxAiPlayer extends ReversiPlayer {
 
 	private final long GLOBAL_TIME_LIMIT;
+	private final ReversiGame.BoardEvaluator heuristics;
 
-	public AiPlayer(long time_limit) {
+	public MinMaxAiPlayer(long time_limit, ReversiGame.BoardEvaluator heuristics) {
 		this.GLOBAL_TIME_LIMIT = time_limit;
+		this.heuristics = heuristics;
 	}
 
 	@Override
@@ -19,8 +21,11 @@ public class AiPlayer extends ReversiPlayer {
 		long start_time = System.nanoTime();
 
 		Set<Point> legal_actions = board.getLegalActions(ai_color);
-		if (legal_actions.size() == 0)
+		System.err.println("LEGAL ACTIONS: (" + ai_color + " ) : " + legal_actions.size());
+
+		if (legal_actions.size() == 0) {
 			return;
+		}
 
 		int max_value = -Integer.MAX_VALUE;
 		Point best_tile = null;
@@ -29,7 +34,7 @@ public class AiPlayer extends ReversiPlayer {
 		for (Point tile : legal_actions) {
 
 			ReversiGame game_copy = board.copy();
-			game_copy.addPiece(ai_color, tile.x, tile.y);
+			game_copy.addNFlip(ai_color, tile.x, tile.y);
 
 			int branch_value = calculateBranchScore(game_copy, false, ai_color, done_by, time_limit);
 
@@ -46,10 +51,7 @@ public class AiPlayer extends ReversiPlayer {
 		} else {
 			// Make calculated best move.
 
-			// TODO: CHANGE name of isLegalAction, make method add last piece =>
-			// no need to use addPiece here.
-			board.isLegalAction(ai_color, best_tile.x, best_tile.y, true);
-			board.addPiece(ai_color, best_tile.x, best_tile.y);
+			board.addNFlip(ai_color, best_tile.x, best_tile.y);
 		}
 
 	}
@@ -61,7 +63,7 @@ public class AiPlayer extends ReversiPlayer {
 
 		if (System.nanoTime() >= done_by - 12000) {
 
-			int state_score = simulated_game.evalState(ai_color, simulated_game.EDAX_HEURISTICS);
+			int state_score = simulated_game.evalState(ai_color, heuristics);
 
 			// Return state score
 			return state_score;
@@ -87,10 +89,7 @@ public class AiPlayer extends ReversiPlayer {
 				// Create a copy of the current game and add piece.
 				ReversiGame game_copy = simulated_game.copy();
 
-				// TODO: CHANGE name of isLegalAction, make method add last
-				// piece => no need to use addPiece here.
-				game_copy.isLegalAction(current_sim_color, tile.x, tile.y, true);
-				game_copy.addPiece(current_sim_color, tile.x, tile.y);
+				game_copy.addNFlip(current_sim_color, tile.x, tile.y);
 
 				int branch_value = calculateBranchScore(game_copy, !is_maximizer_turn, ai_color, done_by, time_limit);
 				done_by += time_limit;
@@ -111,6 +110,11 @@ public class AiPlayer extends ReversiPlayer {
 
 		}
 
+	}
+
+	@Override
+	public String toString() {
+		return "MinMax Ai";
 	}
 
 }
