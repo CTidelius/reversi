@@ -85,14 +85,12 @@ public class ReversiGame {
 		}
 	};
 
-
-
 	public ReversiGame() {
 		gameBoard = new ReversiPiece[8][8];
 		initializeBoard();
 
 	}
-	
+
 	/**
 	 * 
 	 * @return Returns true if every game tile is occupied.
@@ -145,7 +143,6 @@ public class ReversiGame {
 		}
 	}
 
-	
 	// TODO: CHANGE NAME!!!
 	public boolean isLegalAction(int color, int x, int y, boolean isPlayerMove) {
 		if (isOutOfBounds(x, y)) {

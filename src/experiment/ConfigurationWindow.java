@@ -70,8 +70,7 @@ public class ConfigurationWindow {
 
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				
-				
+
 			}
 		});
 

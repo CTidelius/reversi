@@ -19,7 +19,6 @@ public class BoardBuilder {
 		game.addPiece(ReversiGame.BLACK, 0, 0);
 		game.addPiece(ReversiGame.BLANK, 0, 6);
 
-
 	}
 
 }
