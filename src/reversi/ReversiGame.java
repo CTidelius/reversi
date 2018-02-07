@@ -15,6 +15,29 @@ public class ReversiGame {
 
 	public final static int BLANK = 0, WHITE = 1, BLACK = 2;
 
+	
+	public BoardHeuristics GREEDY_HEURISTICS = new BoardHeuristics() {
+		@Override
+		public int evaluateGameState(int color) {
+			
+			int score = 0;
+			
+			for (int x = 0; x < 7; x++) {
+				for (int y = 0; y < 7; y++) {
+					if (gameBoard[x][y].getColor() == color) {
+						score++;
+					} else if (gameBoard[x][y].getColor() == ReversiGame.getInvertedColor(color)) {
+						score--;
+					}
+				}
+			}
+
+			return score;
+		}
+	};
+	
+	
+
 	public ReversiGame() {
 		gameBoard = new ReversiPiece[8][8];
 		initializeBoard();
@@ -124,8 +147,10 @@ public class ReversiGame {
 	/*
 	 * Check the board to update GUI?
 	 */
-	public int evalState(int color) {
+	public int evalState(int color, BoardHeuristics heuristics) {
+		return heuristics.evaluateGameState(color);
 
+		/*
 		int score = 0;
 		int c;
 		for (int x = 0; x < 8; x++) {
@@ -133,7 +158,7 @@ public class ReversiGame {
 				c = gameBoard[x][y].getColor();
 				if (c == color && isCorner(x, y)) {
 					score += 10;
-				} else if (c == color && isBuffer(x, y)){
+				} else if (c == color && isBuffer(x, y)) {
 					score -= 10;
 				} else if (c == color && isEdge(x, y)) {
 					score += 2;
@@ -154,6 +179,8 @@ public class ReversiGame {
 			}
 		}
 		return score;
+	
+	*/
 	}
 
 	private boolean isCorner(int x, int y) {
@@ -326,7 +353,10 @@ public class ReversiGame {
 		 * 
 		 */
 
-		ReversiPlayer ai = new AiPlayer(1000);
+		//ReversiPlayer ai = new AiPlayer(1000);
+		
+		ReversiPlayer ai = new GreedyAiPlayer();
+
 		ReversiPlayer player = new HumanPlayer();
 
 		boolean my_turn = true;
@@ -374,4 +404,17 @@ public class ReversiGame {
 		 */
 
 	}
+
+	interface BoardHeuristics {
+
+		/**
+		 * 
+		 * @param color
+		 *            Color to evaluate for
+		 * @return Returns state score for inserted color
+		 */
+		public int evaluateGameState(int color);
+
+	}
+
 }
