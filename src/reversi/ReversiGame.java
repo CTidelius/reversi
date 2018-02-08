@@ -5,7 +5,7 @@ import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
 
-import reversi.ReversiGame.BoardEvaluator;
+import reversi.*;
 
 /**
  * Created by carltidelius and Tom on 2018-01-19.
@@ -327,7 +327,7 @@ public class ReversiGame {
 
 	
 		ReversiPlayer ai_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.EDAX_HEURISTICS);
-		ReversiPlayer human_player = new MinMaxAiPlayer(ai_time * 1000000l, rg.HOMOGENEOUS_HEURISTICS);
+		ReversiPlayer human_player = new HumanPlayer();
 
 		boolean my_turn = true;
 		while (true) {
